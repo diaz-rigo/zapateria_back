@@ -7,10 +7,10 @@ function logRequest(req, res, next) {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
     next();
 }
+const productRoutes = require('./api/routes/product');
 const authRoutes = require('./api/routes/auth');
 const userRoutes = require('./api/routes/user');
 const categoriRoutes = require('./api/routes/categori');
-const productRoutes = require('./api/routes/product');
 
 const url = 'mongodb+srv://rd209422:' +  process.env.MONGO_ATLAS_PW   + '@cluster0.reakihy.mongodb.net/huejutla'
     mongoose.connect(url, {
