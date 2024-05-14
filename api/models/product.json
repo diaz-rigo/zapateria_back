@@ -1,0 +1,35 @@
+{
+    "_id": "ObjectId('60f3a99b6f2a4523d0c038b0')",
+    "sku": "ZAP001",
+    "name": "Zapatos deportivos para hombre",
+    "description": "Zapatos deportivos cómodos para correr o caminar",
+    "brand": "Nike",
+    "color": "Negro",
+    "size": "42",
+    "material": "Malla transpirable",
+    "gender": "Hombre",
+    "ageGroup": "Adultos",
+    "quantity": 50,
+    "price": 99.99,
+    "category": "Zapatos deportivos",
+    "images": [
+      "https://example.com/images/shoes1.jpg",
+      "https://example.com/images/shoes2.jpg"
+    ],
+    "status": "Disponible",
+    "weight": 0.5,
+    "createdAt": "2022-07-18T10:30:00.000Z",
+    "updatedAt": "2022-07-18T15:45:00.000Z",
+    "promotions": [],
+    "discounts": [],
+    "specialOffers": [],
+    "sales": [],
+    "paymentMethods": ["Tarjeta de crédito", "PayPal"],
+    "shippingMethods": ["Envío estándar", "Recogida en tienda"],
+    "shoeAttributes": {
+      "soleType": "Suela de goma",
+      "heelHeight": 2.5
+    },
+    "tags": ["Deportivo", "Correr", "Nike"]
+  }
+  

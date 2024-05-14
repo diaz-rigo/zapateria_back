@@ -1,0 +1,14 @@
+{
+    "_id": "ObjectId('60f3a99b6f2a4523d0c038b1')",
+    "name": "Zapatos deportivos",
+    "description": "Zapatos diseñados para actividades deportivas",
+    "slug": "zapatos-deportivos",
+    "image": "https://example.com/images/sport-shoes.jpg",
+    "subcategories": ["ObjectId('subcat_id_1')", "ObjectId('subcat_id_2')"],
+    "products": ["ObjectId('product_id_1')", "ObjectId('product_id_2')"],
+    "createdAt": "2022-07-18T10:30:00.000Z",
+    "updatedAt": "2022-07-18T15:45:00.000Z",
+    "status": "Active",
+    "icon": "https://example.com/icons/sport-shoes-icon.png"
+  }
+  

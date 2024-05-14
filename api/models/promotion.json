@@ -1,0 +1,9 @@
+{
+  "_id": "ObjectId('60f3a99b6f2a4523d0c038b2')",
+  "name": "Oferta de Verano",
+  "description": "¡Descuento especial para la temporada de verano!",
+  "discountPercentage": 20,
+  "startDate": "2024-06-01T00:00:00.000Z",
+  "endDate": "2024-08-31T23:59:59.000Z",
+  "isActive": true
+}
