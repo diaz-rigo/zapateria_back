@@ -131,16 +131,16 @@ exports.getAll = async (req, res, next) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-exports.get = async (req, res, next) => {
-  const productId = req.params.productId;
-  try {
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+exports.get = (req, res, next) => {
+  Product.findById(req.params.id)
+    .exec()
+    .then(doc => {
+      if (!doc) {
+        return res.status(404).json({ message: "Not found" });
+      }
+      res.status(200).json(doc);
+    })
+    .catch(err => {
+      res.status(500).json({ error: err });
+    });
 };
