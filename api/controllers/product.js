@@ -131,6 +131,36 @@ exports.getAll = async (req, res, next) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+// exports.getSearch = (req, res, next) => {
+//   // app.get("/search", (req, res) => {
+//   const query = req.query.q; // Obtener el parámetro 'q' de la consulta
+
+//   console.log(query); // Esto mostrará 'dkdddkd' en el caso de la URL mencionada
+
+//   // Aquí puedes realizar la lógica de búsqueda en función de 'query'
+
+//   res.send("Recibido el parámetro q: " + query);
+// };
+exports.getSearch = async (req, res, next) => {
+  const query = req.query.q; // Obtener el parámetro 'q' de la consulta GET
+
+  try {
+    // Realizar la búsqueda en MongoDB usando una expresión regular insensible a mayúsculas/minúsculas
+    const resultados = await Product.find({ name: { $regex: new RegExp(query, 'i') } });
+
+    if (resultados.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron productos que coincidan con la búsqueda' });
+    }
+
+    res.json(resultados); // Enviar resultados como JSON
+  } catch (error) {
+    console.error('Error al buscar productos:', error);
+    res.status(500).json({ error: 'Error al buscar productos' });
+  }
+};
+
 exports.get = (req, res, next) => {
   Product.findById(req.params.id)
     .exec()

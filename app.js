@@ -12,7 +12,9 @@ const authRoutes = require('./api/routes/auth');
 const userRoutes = require('./api/routes/user');
 const categoriRoutes = require('./api/routes/categori');
 
-const url = 'mongodb+srv://rd209422:' +  process.env.MONGO_ATLAS_PW   + '@cluster0.reakihy.mongodb.net/huejutla'
+// const url = 'mongodb+srv://rd209422:' +  process.env.MONGO_ATLAS_PW   + '@cluster0.reakihy.mongodb.net/huejutla'
+const url =
+  "mongodb+srv://rd209422:Cf3fSt1hdv9rf8Ud@cluster0.reakihy.mongodb.net/huejutla";
     mongoose.connect(url, {
     useUnifiedTopology: true,
     useNewUrlParser: true
