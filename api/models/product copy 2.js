@@ -1,24 +1,19 @@
 const mongoose = require('mongoose');
 
-const variantSchema = new mongoose.Schema({
-    color: { type: String, required: true },
-    sizes: [{
-        size: { type: String, required: true },
-        stock: { type: Number, required: true }
-    }]
-});
-
-const productSchema = new mongoose.Schema({
+const productSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     sku: { type: String, required: true }, // Código SKU del producto
     name: { type: String, required: true }, // Nombre del producto
     description: { type: String, required: true }, // Descripción del producto
     brand: { type: String, required: true }, // Marca del producto
+    color: { type: String, required: true }, // Color del producto
+    size: { type: String, required: true }, // Tamaño del producto
     material: { type: String, required: true }, // Material del producto
     gender: { type: String, required: true }, // Género al que se dirige el producto (hombre, mujer, unisex, etc.)
     ageGroup: { type: String, required: true }, // Grupo de edad al que se dirige el producto (niños, adultos, etc.)
+    quantity: { type: Number, required: true }, // Cantidad disponible en inventario
     price: { type: Number, required: true }, // Precio del producto
-    category: { type: String, required: true }, // Referencia a la categoría del producto
+    category:{ type: String, required: true }, // Referencia a la categoría del producto
     images: { type: [String], required: true }, // Lista de URLs de imágenes del producto
     status: { type: String, required: true }, // Estado del producto (disponible, agotado, en oferta, etc.)
     weight: { type: Number, required: true }, // Peso del producto
@@ -30,8 +25,7 @@ const productSchema = new mongoose.Schema({
     sales: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Sale' }], // Historial de ventas del producto
     paymentMethods: [{ type: String }], // Métodos de pago aceptados para el producto
     shippingMethods: [{ type: String }], // Métodos de envío disponibles para el producto
-    tags: { type: [String], required: true }, // Etiquetas adicionales para facilitar la búsqueda y navegación
-    variants: [variantSchema] // Variantes de color y tamaño
+    tags: { type: [String], required: true } // Etiquetas adicionales para facilitar la búsqueda y navegación
 }, { versionKey: false });
 
 module.exports = mongoose.model('Product', productSchema);

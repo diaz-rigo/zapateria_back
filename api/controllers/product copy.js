@@ -3,285 +3,111 @@ const Product = require("../models/product");
 const path = require('path');
 const fs = require('fs');
 const cloudinary = require('../utils/cloudinary'); // Importa la configuración de Cloudinary
-
-exports.deleteImage = async (req, res, next) => {
-  const productId = req.params.id;
-  const imageName = req.params.imageName;
-
+// Función para subir imágenes a Cloudinary
+exports.uploadImagesToCloudinary = async (req, res, next) => {
   try {
-    const product = await Product.findById(productId).exec();
-
-    if (!product) {
-      return res.status(404).json({ message: "Error: Product not found" });
-    }
-
-    const sanitize = str => str.replace(/~|%7E/g, '');
-
-    const imageUrlParts = product.images.map(image => {
-      const parts = image.split('/');
-      return sanitize(parts[parts.length - 1]);
-    });
-
-    console.log("Image URL Parts:", imageUrlParts);
-
-    console.log("Requested Image Name:", imageName);
-
-    // Sanitizar imageName para comparación
-    const sanitizedImageName = sanitize(imageName);
-
-    // Buscar si sanitizedImageName está en imageUrlParts
-    const foundIndex = imageUrlParts.findIndex(part => sanitize(part) === sanitizedImageName);
-
-    // Comparar si se encontró el nombre de imagen
-    if (foundIndex !== -1) {
-      console.log("Las URLs de imagen coinciden.");
-      console.log("Índice donde se encontró:", foundIndex);
-
-      // Obtener el URL completo de la imagen encontrada
-      const imageUrl = product.images[foundIndex];
-      console.log("URL completo de la imagen:", imageUrl);
-    } else {
-      console.log("Las URLs de imagen NO coinciden.");
-    }
-
-    if (foundIndex === -1) {
-      return res.status(404).json({ message: "Error: Image not found for this product", imageName, productImages: product.images });
-    }
-
-    // Obtener la categoría y el ID del producto
-    const category = product.category;
-    const productIdFromURL = req.params.id;
-    const publicId = `${category}/${productIdFromURL}/${imageName.split('.')[0]}`;
-
-    console.log("Public ID:", publicId);
-
-    const result = await cloudinary.uploader.destroy(publicId);
-
-    if (result.result !== 'ok') {
-      console.log(result.result);
-      return res.status(500).json({ message: "Error deleting image from Cloudinary" });
-    }
-
-    // Remover la imagen del array de imágenes del producto
-    product.images.splice(foundIndex, 1);
-    // Guardar los cambios en el producto
-    await product.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Image deleted successfully from Cloudinary",
-    });
-
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-};
-
-
-
-
-exports.updateImage = async (req, res, next) => {
-  try {
-    const _id = req.params.id;
-    const category = req.params.category;
-
-    // Utiliza await para esperar la resolución de la promesa
-    const response = await Product.findById(_id).exec();
-    console.log('product find', response);
-
-    if (!response) {
-      return res.status(404).json({ message: "Error: Product not found" });
-    }
-
-    let images = response.images;
-
-    console.log('find', images);
-    console.log(`req.position: ${req.body.position}, req.file: ${req.file.originalname}`);
-    console.log('carpeta', req.file.path);
-
-    if (req.body.position === 0 || (req.body.position && req.file)) {
-      // const result = await cloudinary.uploader.upload(req.file.path, {
-      //   folder: `${category}/${_id}`,
-      //   public_id: req.file.originalname
-      // });
-      const path = require('path');
-
-      // Dentro de tu función updateImage antes de cargar en Cloudinary
-      const fileName = path.parse(req.file.originalname).name;
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: `${category}/${_id}`,
-        public_id: fileName // Usar el nombre de archivo sin la extensión
-      });
-
-
-      // Elimina la imagen temporal del servidor
-      fs.unlinkSync(req.file.path);
-
-      const cloudinaryUrl = result.secure_url;
-      const body = {
-        position: req.body.position,
-        image: cloudinaryUrl
-      };
-
-      if (images.length > body.position) {
-        console.log('if', images);
-        images[body.position] = body.image;
-      } else {
-        console.log('else', images);
-        images.push(body.image);
+      if (!req.files || req.files.length === 0) {
+          return res.status(400).json({ message: 'No se han enviado imágenes.' });
       }
-    } else {
-      return res.status(400).json({ message: "Error: Invalid request" });
-    }
+      console.log(req.body)
+      const uploadedImages = [];
 
-    console.log('set', images);
+      // Recorre todas las imágenes recibidas
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path, { folder: 'productos' });
 
-    // Utiliza await para esperar la resolución de la actualización
-    const updatedProduct = await Product.findOneAndUpdate(
-      { _id: _id },
-      { $set: { images: images } },
-      { new: true }
-    ).exec();
+          // const result = await cloudinary.uploader.upload(file.path); // Sube la imagen a Cloudinary
+          uploadedImages.push(result.secure_url); // Agrega la URL de la imagen subida al array
+          fs.unlinkSync(file.path); // Elimina el archivo local después de subirlo a Cloudinary
+      }
 
-    console.log('update', images);
-
-    res.status(200).json({
-      image: updatedProduct
-    });
+      res.status(201).json({ images: uploadedImages });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: error.message || "Internal Server Error" });
+      console.error("Error al subir imágenes a Cloudinary:", error);
+      res.status(500).json({ message: 'Ocurrió un error al subir las imágenes.' });
   }
 }
 
+exports.create = async (req, res, next) => {
+  const { sku, name, description, brand, color, size, material, gender, ageGroup, quantity, price, category, status, weight, tags, images } = req.body;
 
+  try {
+    // Validar datos de entrada
+    const requiredFields = ['sku', 'name', 'description', 'brand', 'color', 'size', 'material', 'gender', 'ageGroup', 'quantity', 'price', 'category', 'status', 'weight', 'tags', 'images'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    if (missingFields.length > 0) {
+      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+    }
 
+    // Iniciar una transacción de base de datos si es compatible
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
+    try {
+      // Crear el producto
+      const product = new Product({
+        _id: new mongoose.Types.ObjectId(),
+        sku,
+        name,
+        description,
+        brand,
+        color,
+        size,
+        material,
+        gender,
+        ageGroup,
+        quantity,
+        price,
+        category,
+        status,
+        weight,
+        tags,
+        images // Asigna las URLs de las imágenes al campo images
+      });
 
-exports.getAll = (req, res, next) => {
-  Product.find({ status: "ACTIVE" })
-    .exec()
-    .then(docs => {
-      res.status(200).json(docs);
-    })
-    .catch(err => {
-      res.status(500).json({ error: err });
-    });
+      // Guardar el producto en la base de datos
+      await product.save({ session });
+
+      // Confirmar la transacción
+      await session.commitTransaction();
+      session.endSession();
+
+      // Responder con el ID del producto creado
+      res.status(201).json({ productId: product._id, message: 'Producto creado exitosamente.' });
+    } catch (error) {
+      // Abortar la transacción si ocurre un error
+      await session.abortTransaction();
+      session.endSession();
+      console.log(error.message)
+      throw error; // Relanzar el error para que sea manejado por el middleware de error
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+    console.log(error.message)
+  }
 };
 
-
-
-
-exports.get = (req, res, next) => {
-  Product.findById(req.params.id)
-    .exec()
-    .then(doc => {
-      if (!doc) {
-        return res.status(404).json({ message: "Not found" });
-      }
-      res.status(200).json(doc);
-    })
-    .catch(err => {
-      res.status(500).json({ error: err });
-    });
-};
-
-
-exports.create = (req, res, next) => {
-  const product = new Product({
-    _id: new mongoose.Types.ObjectId(),
-    sku: req.body.sku,
-    name: req.body.name,
-    description: req.body.description,
-    unit: req.body.unit,
-    expiration: req.body.expiration,
-    model: req.body.model,
-    quantity: req.body.quantity,
-    price: req.body.price,
-    category: req.body.category,
-    maker: req.body.maker,
-    images: req.body.images || [],
-    status: 'ACTIVE',
-    weight: req.body.weight || null,
-    ingredients: req.body.ingredients || [],
-    allergens: req.body.allergens || [],
-    nutritionalInformation: req.body.nutritionalInformation || null,
-    isFeatured: req.body.isFeatured || false,
-    isVegetarian: req.body.isVegetarian || false,
-    isGlutenFree: req.body.isGlutenFree || false,
-    createdAt: new Date() // La fecha y hora de creación se asigna automáticamente al momento de crear el producto
-  });
-
-  product.save()
-    .then(result => {
-      res.status(201).json(result);
-    })
-    .catch(err => {
-      res.status(500).json({ error: err });
-    });
-};
-
-
-
-
-
-exports.updateProductStatus = (req, res, next) => {
+exports.updateProductImagesById = async (req, res, next) => {
   const productId = req.params.productId;
-  const newStatus = req.body.status; // Se espera que el nuevo estado esté en el cuerpo de la solicitud
+  const images = req.body.images;
 
-  Product.findByIdAndUpdate(productId, { status: newStatus })
-    .then(updatedProduct => {
-      res.status(200).json(updatedProduct); // Devuelve el producto actualizado
-    })
-    .catch(error => {
-      res.status(500).json({ error: "Error al actualizar el estado del producto" });
-    });
-  // En caso de éxito, enviar una respuesta 200 OK
-  res.status(200).json({ message: "Estado del producto actualizado exitosamente" });
-  // En caso de error, enviar una respuesta de error, por ejemplo:
-  res.status(500).json({ error: "Error al actualizar el estado del producto" });
-};
+  try {
+      const product = await Product.findById(productId);
 
-
-
-exports.update = (req, res, next) => {
-  const _id = req.params.id;
-  const body = {
-    sku: req.body.sku,
-    name: req.body.name,
-    description: req.body.description,
-    unit: req.body.unit,
-    expiration: req.body.expiration,
-    model: req.body.model,
-    quantity: req.body.quantity,
-    price: req.body.price,
-    category: req.body.category,
-    maker: req.body.maker,
-    images: req.body.images, // Puedes añadir esta línea si también permites editar imágenes
-    status: req.body.status, // Asumiendo que hay un campo para el estado del producto (ACTIVE o INACTIVE)
-    weight: req.body.weight,
-    ingredients: req.body.ingredients,
-    allergens: req.body.allergens,
-    nutritionalInformation: req.body.nutritionalInformation,
-    isFeatured: req.body.isFeatured,
-    isVegetarian: req.body.isVegetarian,
-    isGlutenFree: req.body.isGlutenFree,
-    // Agrega otros campos del formulario según sea necesario
-  };
-
-  Product.findOneAndUpdate({ _id: _id }, { $set: body }, { new: true })
-    .exec()
-    .then(doc => {
-      if (!doc) {
-        return res.status(404).json({ error: 'Producto no encontrado' });
+      if (!product) {
+          return res.status(404).json({ message: 'Producto no encontrado.' });
       }
-      res.status(200).json(doc);
-    })
-    .catch(err => {
-      res.status(500).json({ error: err });
-    });
-};
+
+      // Actualiza las imágenes del producto
+      product.images = images;
+      await product.save();
+
+      res.status(200).json({ message: 'Imágenes del producto actualizadas correctamente.' });
+  } catch (error) {
+      console.error("Error al actualizar las imágenes del producto:", error);
+      res.status(500).json({ message: 'Ocurrió un error al actualizar las imágenes del producto.' });
+  }
+}
 
 exports.delete = (req, res, next) => {
   const _id = req.params.id;
@@ -297,61 +123,53 @@ exports.delete = (req, res, next) => {
     });
 };
 
+exports.getAll = async (req, res, next) => {
+  try {
+    const products = await Product.find();
+    res.status(200).json(products);
+  } catch (error) {
+   
+    res.status(500).json({ error: error.message });
+  }
+};
 
-exports.getByCategory = (req, res, next) => {
-  Product.find({ category: req.params.id })
+
+// exports.getSearch = (req, res, next) => {
+//   // app.get("/search", (req, res) => {
+//   const query = req.query.q; // Obtener el parámetro 'q' de la consulta
+
+//   console.log(query); // Esto mostrará 'dkdddkd' en el caso de la URL mencionada
+
+//   // Aquí puedes realizar la lógica de búsqueda en función de 'query'
+
+//   res.send("Recibido el parámetro q: " + query);
+// };
+exports.getSearch = async (req, res, next) => {
+  const query = req.query.q; // Obtener el parámetro 'q' de la consulta GET
+
+  try {
+    // Realizar la búsqueda en MongoDB usando una expresión regular insensible a mayúsculas/minúsculas
+    const resultados = await Product.find({ name: { $regex: new RegExp(query, 'i') } });
+
+    if (resultados.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron productos que coincidan con la búsqueda' });
+    }
+
+    res.json(resultados); // Enviar resultados como JSON
+  } catch (error) {
+    console.error('Error al buscar productos:', error);
+    res.status(500).json({ error: 'Error al buscar productos' });
+  }
+};
+
+exports.get = (req, res, next) => {
+  Product.findById(req.params.id)
     .exec()
     .then(doc => {
       if (!doc) {
         return res.status(404).json({ message: "Not found" });
       }
       res.status(200).json(doc);
-    })
-    .catch(err => {
-      res.status(500).json({ error: err });
-    });
-};
-
-exports.getAllPaginate = (req, res, next) => {
-  const skip = parseInt(req.body.skip) || 0;
-  const limit = parseInt(req.body.limit) || 10;
-  const query = {};
-
-  const filters = req.body.filters;
-  if (filters) {
-    if (filters.name) {
-      query.name = new RegExp(filters.name, 'i');
-    }
-    if (filters.sku) {
-      query.sku = new RegExp(filters.sku, 'i');
-    }
-    if (filters.category) {
-      query.category = filters.category;
-    }
-    if (filters.priceMin && filters.priceMax) {
-      query.price = { $gte: parseFloat(filters.priceMin), $lte: parseFloat(filters.priceMax) };
-    }
-    if (filters.maker) {
-      query.maker = filters.maker;
-    }
-  }
-  // Ordenar por fecha de creación en orden descendente (DESC)
-  const sort = { createdAt: -1 };
-
-  Product.find(query)
-    .skip(skip)
-    .limit(limit)
-    .sort(sort)
-    .exec()
-    .then(docs => {
-      // Mapear los documentos para incluir el campo createdAt en la respuesta
-      const response = docs.map(doc => {
-        return {
-          ...doc._doc,
-          createdAt: doc.createdAt // Agregar el campo createdAt a cada documento
-        };
-      });
-      res.status(200).json(response);
     })
     .catch(err => {
       res.status(500).json({ error: err });

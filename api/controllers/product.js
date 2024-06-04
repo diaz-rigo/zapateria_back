@@ -27,12 +27,14 @@ exports.uploadImagesToCloudinary = async (req, res, next) => {
       res.status(500).json({ message: 'Ocurrió un error al subir las imágenes.' });
   }
 }
+
+// Función para crear un producto
 exports.create = async (req, res, next) => {
-  const { sku, name, description, brand, color, size, material, gender, ageGroup, quantity, price, category, status, weight, tags, images } = req.body;
+  const { sku, name, description, brand, material, gender, ageGroup, price, category, status, weight, tags, images, variants } = req.body;
 
   try {
     // Validar datos de entrada
-    const requiredFields = ['sku', 'name', 'description', 'brand', 'color', 'size', 'material', 'gender', 'ageGroup', 'quantity', 'price', 'category', 'status', 'weight', 'tags', 'images'];
+    const requiredFields = ['sku', 'name', 'description', 'brand', 'material', 'gender', 'ageGroup', 'price', 'category', 'status', 'weight', 'tags', 'images', 'variants'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     if (missingFields.length > 0) {
       throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
@@ -50,18 +52,16 @@ exports.create = async (req, res, next) => {
         name,
         description,
         brand,
-        color,
-        size,
         material,
         gender,
         ageGroup,
-        quantity,
         price,
         category,
         status,
         weight,
         tags,
-        images // Asigna las URLs de las imágenes al campo images
+        images, // Asigna las URLs de las imágenes al campo images
+        variants // Asigna las variantes de color y tamaño
       });
 
       // Guardar el producto en la base de datos
