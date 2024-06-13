@@ -5,40 +5,22 @@ const Schema = mongoose.Schema;
 const sizeStockSchema = new Schema({
     size: { type: Number, required: true },
     stock: { type: Number, required: true },
-    price: { type: Number, required: true }
+    price: { type: Number, required: true } // Adding price for each size
 });
 
-// Schema for product variants
 // Schema for product variants
 const variantSchema = new Schema({
     color: { type: String, required: true },
     texture: { type: String, required: true },
-    sizeStock: {
-        type: [sizeStockSchema],
-        required: true
-    },
-    images: {
-        type: [String],
-        required: true,
-        validate: {
-            validator: function(images) {
-                if (!Array.isArray(images)) return false;
-                for (let i = 0; i < images.length; i++) {
-                    if (typeof images[i] !== 'string') return false;
-                }
-                return true;
-            },
-            message: props => `${props.value} should be an array of strings!`
-        }
-    }
+    sizeStock: [sizeStockSchema], // Array of objects that contain size, stock, and price
+    images: { type: [String] } // URLs to images
 });
-
 
 // Main product schema
 const productSchema = new Schema({
     name: { type: String, required: true },
     brand: { type: String, required: true },
-    category: { type: String, required: true },
+    category: { type: String, required: true }, // e.g., "sneakers", "boots", "sandals"
     material: { type: String, required: true },
     description: { type: String },
     dateAdded: { type: Date, default: Date.now },
@@ -53,7 +35,7 @@ const productSchema = new Schema({
             }
         ]
     },
-    variants: { type: [variantSchema], required: true }
+    variants: [variantSchema] // Embeds the variants schema
 });
 
 // Create and export the Product model
