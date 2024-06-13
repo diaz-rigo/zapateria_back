@@ -49,7 +49,7 @@ app.use('/categori', categoriRoutes);
 
 
 app.use((req, res, next) => {
-    const error = new Error(' error Not found 12 01 2024');
+    const error = new Error(' corriendo ...');
     error.status = 404;
     next(error);
 });
