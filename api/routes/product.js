@@ -2,21 +2,21 @@ const express = require("express");
 const router = express.Router();
 
 const multer = require('multer');
-
+const upload = require('../middlewares/upload');
 // const upload = require('../middlewares/upload');
 const ProductController = require('../controllers/product');
 // Configuración de Multer para almacenamiento temporal
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + '-' + file.originalname);
-    }
-  });
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//       cb(null, 'uploads/');
+//     },
+//     filename: (req, file, cb) => {
+//       cb(null, Date.now() + '-' + file.originalname);
+//     }
+//   });
   
-  const upload = multer({ storage });
+//   const upload = multer({ storage }); 
   
 // Rutas para subir imágenes y texturas
 router.post("/upload-images", upload.array('images', 10), ProductController.uploadImagesToCloudinary);

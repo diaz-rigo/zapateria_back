@@ -3,34 +3,7 @@ const Product = require("../models/product");
 const path = require('path');
 const fs = require('fs');
 const cloudinary = require('../utils/cloudinary'); // Importa la configuración de Cloudinary
-// Función para subir imágenes a Cloudinary
-// exports.uploadImagesToCloudinary = async (req, res, next) => {
-//   try {
-//       if (!req.files || req.files.length === 0) {
-//           return res.status(400).json({ message: 'No se han enviado imágenes.' });
-//       }
-//       console.log(req.body)
-//       const uploadedImages = [];
 
-//       // Recorre todas las imágenes recibidas
-//       for (const file of req.files) {
-//         const result = await cloudinary.uploader.upload(file.path, { folder: 'productos' });
-
-//           // const result = await cloudinary.uploader.upload(file.path); // Sube la imagen a Cloudinary
-//           uploadedImages.push(result.secure_url); // Agrega la URL de la imagen subida al array
-//           fs.unlinkSync(file.path); // Elimina el archivo local después de subirlo a Cloudinary
-//       }
-
-//       res.status(201).json({ images: uploadedImages });
-//   } catch (error) {
-//       console.error("Error al subir imágenes a Cloudinary:", error);
-//       res.status(500).json({ message: 'Ocurrió un error al subir las imágenes.' });
-//   }
-// }
-// Función para subir imágenes a Cloudinary
-// Importar dependencias necesarias
-
-// Función para subir imágenes a Cloudinary
 
 exports.uploadImagesToCloudinary = async (req, res) => {
   try {
