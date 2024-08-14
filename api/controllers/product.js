@@ -4,6 +4,29 @@ const path = require('path');
 const fs = require('fs');
 const cloudinary = require('../utils/cloudinary'); // Importa la configuración de Cloudinary
 
+// Function to update a product by ID
+exports.update = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const updateData = req.body;
+
+        // Find the product by ID and update it with the new data
+        const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, {
+            new: true, // Return the updated document
+            runValidators: true // Run schema validation on update
+        });
+
+        if (!updatedProduct) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        console.error('Error updating product:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 
 exports.uploadImagesToCloudinary = async (req, res) => {
   try {
@@ -59,7 +82,6 @@ exports.uploadTexturecloudinary = async (req, res) => {
   }
 };
 
-
 exports.create = async (req, res, next) => {
   const { name, brand, category, material, description, images, variants } = req.body;
 
@@ -97,14 +119,14 @@ exports.create = async (req, res, next) => {
         throw new Error(`Variant at index ${index} must have an array of sizeStock.`);
       }
       variant.sizeStock.forEach((sizeStock, sizeIndex) => {
-        if (typeof sizeStock.size !== 'number') {
-          throw new Error(`sizeStock at index ${sizeIndex} in variant at index ${index} must have size as a number.`);
+        if (typeof sizeStock.size !== 'number' || sizeStock.size <= 0) {
+          throw new Error(`sizeStock at index ${sizeIndex} in variant at index ${index} must have size as a positive number.`);
         }
-        if (typeof sizeStock.stock !== 'number') {
-          throw new Error(`sizeStock at index ${sizeIndex} in variant at index ${index} must have stock as a number.`);
+        if (typeof sizeStock.stock !== 'number' || sizeStock.stock <= 0) {
+          throw new Error(`sizeStock at index ${sizeIndex} in variant at index ${index} must have stock as a positive number.`);
         }
-        if (typeof sizeStock.price !== 'number') {
-          throw new Error(`sizeStock at index ${sizeIndex} in variant at index ${index} must have price as a number.`);
+        if (typeof sizeStock.price !== 'number' || sizeStock.price <= 0) {
+          throw new Error(`sizeStock at index ${sizeIndex} in variant at index ${index} must have price as a positive number.`);
         }
       });
 
@@ -153,6 +175,7 @@ exports.create = async (req, res, next) => {
 };
 
 
+
 exports.updateProductImagesById = async (req, res, next) => {
   const productId = req.params.productId;
   const images = req.body.images;
@@ -191,25 +214,15 @@ exports.delete = (req, res, next) => {
 
 exports.getAll = async (req, res, next) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().sort({ dateAdded: -1 }); // Ordenar por fecha de adición en orden descendente
     res.status(200).json(products);
   } catch (error) {
-
     res.status(500).json({ error: error.message });
   }
 };
 
 
-// exports.getSearch = (req, res, next) => {
-//   // app.get("/search", (req, res) => {
-//   const query = req.query.q; // Obtener el parámetro 'q' de la consulta
 
-//   console.log(query); // Esto mostrará 'dkdddkd' en el caso de la URL mencionada
-
-//   // Aquí puedes realizar la lógica de búsqueda en función de 'query'
-
-//   res.send("Recibido el parámetro q: " + query);
-// };
 exports.getSearch = async (req, res, next) => {
   const query = req.query.q; // Obtener el parámetro 'q' de la consulta GET
 
