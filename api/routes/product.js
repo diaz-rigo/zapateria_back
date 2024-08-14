@@ -20,5 +20,6 @@ router.post("/", ProductController.create);
 
 router.delete("/:id", ProductController.delete);
 router.put("/:id", ProductController.update);
+router.post("/page/:limit/:skip", ProductController.getAllPaginate);
 
 module.exports = router;

@@ -4,6 +4,57 @@ const path = require('path');
 const fs = require('fs');
 const cloudinary = require('../utils/cloudinary'); // Importa la configuración de Cloudinary
 
+exports.getAllPaginate = (req, res, next) => {
+  const skip = parseInt(req.params.skip) || 0;
+  const limit = parseInt(req.params.limit) || 10;
+  const query = {};
+
+  const filters = req.body.filters;
+  if (filters) {
+    if (filters.name) {
+      query.name = new RegExp(filters.name, 'i');
+    }
+    if (filters.sku) {
+      query.sku = new RegExp(filters.sku, 'i');
+    }
+    if (filters.category) {
+      query.category = filters.category;
+    }
+    console.log(filters.priceMin )
+    console.log(filters.priceMax )
+    if (filters.priceMin && filters.priceMax) {
+      query.price = { $gte: parseFloat(filters.priceMin), $lte: parseFloat(filters.priceMax) };
+    }
+    if (filters.maker) {
+      query.maker = filters.maker;
+    }
+  }
+
+  // Ordenar por fecha de creación en orden descendente (DESC)
+  const sort = { createdAt: -1 };
+
+  Product.find(query)
+    .skip(skip)
+    .limit(limit)
+    .sort(sort)
+    .exec()
+    .then(docs => {
+      // Mapear los documentos para incluir el campo createdAt en la respuesta
+      const response = docs.map(doc => {
+        return {
+          ...doc._doc,
+          createdAt: doc.createdAt // Agregar el campo createdAt a cada documento
+        };
+      });
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      res.status(500).json({ error: err });
+    });
+};
+
+
+
 // Function to update a product by ID
 exports.update = async (req, res) => {
     try {
