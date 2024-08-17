@@ -11,6 +11,8 @@ const productRoutes = require('./api/routes/product');
 const authRoutes = require('./api/routes/auth');
 const userRoutes = require('./api/routes/user');
 const categoriRoutes = require('./api/routes/categori');
+const paymentStripeRoutes = require('./api/routes/paymentStripe');
+const correo = require('./api/routes/emailRoutes');
 
 // const url = 'mongodb+srv://rd209422:' +  process.env.MONGO_ATLAS_PW   + '@cluster0.reakihy.mongodb.net/huejutla'
 const url =
@@ -46,6 +48,8 @@ app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/product', productRoutes);
 app.use('/categori', categoriRoutes);
+app.use('/stripe', paymentStripeRoutes);
+app.use('/correo', correo);
 
 
 app.use((req, res, next) => {
