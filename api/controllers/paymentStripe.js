@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Stripe = require('stripe');
-const stripe = new Stripe('sk_test_51PopFl02tsjptClZ7smkQseepxegVq3YsUI5aOdEsG1JkVlSL75h3tUXe5p3DY7SmIvObK5WTwrRRtZ7caJMNud800VTMuIDtG');
+const stripe = new Stripe(process.env.STRIPE);
 
 const User = require("../models/user");
 const Purchase = require("../models/purchase");
