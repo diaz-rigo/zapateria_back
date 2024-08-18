@@ -29,6 +29,14 @@ const purchaseSchema = new mongoose.Schema({
   success_url: String,
   stripeSessionId: String,
   codigoPedido: { type: String, required: true },
+  estadoEnvio: { type: String, default: 'Pendiente' }, // Estado actual del envío
+  historialEnvio: [{
+    estado: String,       // Estado del envío (ej. "En camino", "Entregado")
+    fechaCambio: Date     // Fecha del cambio de estado
+  }],
+  trackingNumber: String, // Número de seguimiento del envío
+  courier: String,        // Proveedor de envío (ej. "DHL", "FedEx")
+  actualizacionReciente: { type: Date, default: Date.now }, // Fecha de última actualización
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -82,8 +82,8 @@ exports.createSession = async (req, res) => {
       payment_method_types: ['card'],
       mode: "payment",
       line_items,
-      success_url: success_url || "https://zapaterias-huejutla.vercel.app/payment/order-success?token={CHECKOUT_SESSION_ID}",
-      cancel_url: cancel_url || "https://zapaterias-huejutla.vercel.app/payment/order-detail?deliveryOption=inStore",
+      success_url:  "https://zapaterias-huejutla.vercel.app/payment/order-success?token={CHECKOUT_SESSION_ID}",
+      cancel_url:  "https://zapaterias-huejutla.vercel.app/payment/order-detail?deliveryOption=inStore",
       customer_email: datoscliente.email,
       metadata: {
         tipoEntrega,
@@ -111,12 +111,12 @@ exports.createSession = async (req, res) => {
                 <p style="color: #0033cc; font-size: 18px; font-weight: bold;">Tu pedido ha sido solicitado con éxito.</p>
                 <p style="color: #0092DF; font-size: 22px; font-weight: bold;">Código de Pedido: ${codigoPedido} 🎉</p>
                 <p style="color: #0033cc; font-size: 16px;">Detalles de tu compra:</p>
+                <span style="margin-left: auto;">Envío: ${((totalNetoAmount - line_items_total) / 100).toFixed(2)} MXN</span>
                 <ul style="color: #0033cc; font-size: 16px; padding-left: 20px; text-align: left; list-style-type: none; margin: 0;">
                   ${productos.map(producto => `
                     <li style="margin-bottom: 10px; display: flex; align-items: center;">
                       <img src="${producto.image}" alt="${producto.name}" style="max-width: 50px; height: auto; margin-right: 10px; vertical-align: middle;">
                       <span>${producto.name} - ${producto.cantidad} x ${producto.precio.toFixed(2)} MXN</span>
-                      <span style="margin-left: auto;">Envío: ${((totalNetoAmount - line_items_total) / 100).toFixed(2)} MXN</span>
                     </li>
                   `).join('')}
                   <li style="margin-top: 10px;"><strong>Total Neto: ${totalneto} MXN</strong></li>
@@ -179,7 +179,13 @@ exports.createSession = async (req, res) => {
       codigoPedido,
       direccion: req.body.direccion,
       success_url: session.url,
-      stripeSessionId: session.id
+      stripeSessionId: session.id,
+      estadoEnvio: 'Pendiente', // Inicialmente pendiente
+      historialEnvio: [{
+        estado: 'Pendiente',
+        fechaCambio: new Date()
+      }],
+      actualizacionReciente: new Date(),
     });
     await purchase.save();
 

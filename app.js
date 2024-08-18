@@ -13,8 +13,8 @@ const userRoutes = require('./api/routes/user');
 const categoriRoutes = require('./api/routes/categori');
 const paymentStripeRoutes = require('./api/routes/paymentStripe');
 const correo = require('./api/routes/emailRoutes');
+const purchase = require('./api/routes/purchase');
 
-// const url = 'mongodb+srv://rd209422:' +  process.env.MONGO_ATLAS_PW   + '@cluster0.reakihy.mongodb.net/huejutla'
 const url =
   "mongodb+srv://rd209422:Cf3fSt1hdv9rf8Ud@cluster0.reakihy.mongodb.net/huejutla";
     mongoose.connect(url, {
@@ -50,6 +50,7 @@ app.use('/product', productRoutes);
 app.use('/categori', categoriRoutes);
 app.use('/stripe', paymentStripeRoutes);
 app.use('/correo', correo);
+app.use('/purchase', purchase);
 
 
 app.use((req, res, next) => {
