@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const purchaseController = require('../controllers/purchase');
+router.post('/update-purchase-status', purchaseController.update_purchase_status);
+
 
 // Actualizar el estado del envío
 router.put('/actualizar-estado-envio', purchaseController.updateShipmentStatus);
@@ -10,7 +12,6 @@ router.get('/historial-envio/:codigoPedido', purchaseController.getShipmentHisto
 
 // Obtener la última actualización
 router.get('/ultima-actualizacion/:codigoPedido', purchaseController.getLastUpdate);
-
 
 
 

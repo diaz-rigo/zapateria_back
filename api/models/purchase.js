@@ -29,15 +29,16 @@ const purchaseSchema = new mongoose.Schema({
   success_url: String,
   stripeSessionId: String,
   codigoPedido: { type: String, required: true },
-  estadoEnvio: { type: String, default: 'Pendiente' }, // Estado actual del envío
+  estadoEnvio: { type: String, default: 'Pendiente' },
   historialEnvio: [{
-    estado: String,       // Estado del envío (ej. "En camino", "Entregado")
-    fechaCambio: Date     // Fecha del cambio de estado
+    estado: String,
+    fechaCambio: Date
   }],
-  trackingNumber: String, // Número de seguimiento del envío
-  courier: String,        // Proveedor de envío (ej. "DHL", "FedEx")
-  actualizacionReciente: { type: Date, default: Date.now }, // Fecha de última actualización
-  createdAt: { type: Date, default: Date.now }
+  trackingNumber: String,
+  courier: String,
+  actualizacionReciente: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }  // Referencia al modelo User
 });
 
 module.exports = mongoose.model('Purchase', purchaseSchema);

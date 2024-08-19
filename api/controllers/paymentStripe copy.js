@@ -5,6 +5,7 @@ const stripe = new Stripe(process.env.STRIPE);
 const User = require("../models/user");
 const Purchase = require("../models/purchase");
 const transporter = require("../middlewares/nodemailer");
+const BASE_URL = process.env.BASE_URL; // Cargar la URL base desde la variable de entorno
 
 const isValidURL = (string) => {
   try {
